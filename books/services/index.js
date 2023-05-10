@@ -1,12 +1,19 @@
 const path = require('path');
 const fs = require('fs').promises;
-
+const { ReviewService } = require('../../reviews/services/index.js');
+const reviewService = new ReviewService();
 class BookService {
     #pathToDB = path.resolve('./db/books.json');
     async getBooks() {
         const books = JSON.parse(
             (await fs.readFile(this.#pathToDB)).toString()
         );
+        for (const book of Object.keys(books)) {
+            books[book].reviews = await reviewService.getReviewByBookId(
+                books[book].id
+            );
+        }
+
         return books;
     }
     async createBook(book) {
